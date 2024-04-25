@@ -2,9 +2,169 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Wordle</title>
+    <title>Guess the Word</title>
+    <link href="style.css" rel="stylesheet">
 </head>
 <body>
-
+    <div class="container">
+        <div class="content">
+            <table>
+                <tbody id="board">
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="input-container">
+                <input type="text" maxlength="5" minlength="5">
+                <button>Enter!</button>
+            </div>
+            <button id="restart">Restart</button>
+        <p id="game-over"></p>
+        </div>
+    </div>
 </body>
+<script>
+    const wordList =["CRANE", "MERGE", "PLANE", "KNOWN", "TANGO", "PHONE", "WHOLE", "REACH", "REBEL",]
+    let answer = "aaaaa";
+    const board = document.getElementById('board');
+    const textBox = document.querySelector('input');
+    const submitButton = document.querySelector('button');
+    const gameOverMessage = document.getElementById('game-over');
+    const restart = document.getElementById('restart');
+
+
+    let currentGuessNumber = 0
+    setAnswer();
+
+    function setAnswer(){
+        answer = wordList[Math.floor(Math.random() * wordList.length)]
+    }
+
+    submitButton.addEventListener('click', function(){
+        let guess = textBox.value;
+        if (guess.length !==5){
+            return
+        }
+        textBox.value = ""
+        writeGuess(guess)
+        currentGuessNumber++;
+        if (guess.toUpperCase() === answer.toUpperCase()){
+            gameOverMessage.textContent = 'You won!!!';
+            submitButton.classList.add('hidden');
+            textBox.classList.add('hidden');
+            gameOverMessage.classList.remove('hidden');
+            return
+        }
+
+
+        if (currentGuessNumber >= board.children.length) {
+            gameOverMessage.textContent = `You lost :(The word was ${answer}.`;
+            submitButton.classList.add('hidden');
+            textBox.classList.add('hidden');
+            gameOverMessage.classList.remove('hidden');
+            return
+        }
+    });
+
+    restart.addEventListener('click', function(e){
+        gameOverMessage.classList.add('hidden');
+        textBox.classList.remove('hidden');
+        submitButton.classList.remove('hidden');
+        currentGuessNumber = 0;
+        answer = wordList[Math.floor(Math.random() * wordList.length)]
+        textBox.value ="";
+        board.innerHTML =
+            "<tr><td></td><td></td><td></td><td></td><td></td></tr>"+
+            "<tr><td></td><td></td><td></td><td></td><td></td></tr>"+
+            "<tr><td></td><td></td><td></td><td></td><td></td></tr>"+
+            "<tr><td></td><td></td><td></td><td></td><td></td></tr>"+
+            "<tr><td></td><td></td><td></td><td></td><td></td></tr>";
+
+
+    })
+
+    function writeGuess(guess){
+        let matchArray = buildMatchArray(guess)
+        let currentGuessRow = board.children[currentGuessNumber];
+        let columns  = currentGuessRow.children
+
+        for (let i = 0; i<matchArray.length; i++){
+            let column = columns[i];
+            column.textContent = guess[i].toUpperCase();
+
+            if (matchArray[i] === 2){
+                column.classList.add('correct');
+            } else if (matchArray[i] ===1){
+                column.classList.add('in-word');
+            } else {
+                column.classList.add('incorrect');
+            }
+        }
+    }
+
+
+    function buildMatchArray(guess){
+        guess = guess.toUpperCase();
+        let answerAsArray = [];
+        let matchArray = [0, 0, 0, 0, 0];
+        for (let i = 0; i < answer.length; i++){
+            let letter = answer[i].toUpperCase();
+            answerAsArray.push(letter);
+        }
+
+        for (let i = 0; i < guess.length; i ++){
+            let letter = guess[i];
+            if (letter === answer[i]){
+                answerAsArray[i] = null;
+                matchArray[i] = 2;
+            }
+        }
+        for (let i = 0; i < guess.length; i ++){
+            let letter = guess[i];
+            let index = answerAsArray.indexOf(letter);
+
+            if (index === -1){
+                continue
+            }
+
+            answerAsArray[index] = null;
+            matchArray[i] = 1
+        }
+        return matchArray
+    }
+
+</script>
 </html>
